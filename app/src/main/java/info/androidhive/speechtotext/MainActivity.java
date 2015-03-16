@@ -1,12 +1,8 @@
 package info.androidhive.speechtotext;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -21,6 +17,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.base.Joiner;
+
+import info.androidhive.speechtotext.speech_calculator.RecognitionGuess;
+import info.androidhive.speechtotext.speech_calculator.SpeechCalculator;
 
 public class MainActivity extends Activity {
 
@@ -90,9 +89,11 @@ public class MainActivity extends Activity {
 			if (resultCode == RESULT_OK && null != data) {
 				ArrayList<String> result = data
 						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-				txtSpeechInput.setText(Joiner.on("\n").join(
-                        SpeechCalculator.processRecognitionResult(result)));
-                ttobj.speak("stranger things can happen both before and after noon", TextToSpeech.QUEUE_FLUSH, null);
+
+                List<RecognitionGuess> results = SpeechCalculator.processRecognitionResult(result);
+
+				txtSpeechInput.setText(Joiner.on("\n").join(results));
+                ttobj.speak(results.get(0).toTTSForm(), TextToSpeech.QUEUE_FLUSH, null);
             }
 			break;
 		}

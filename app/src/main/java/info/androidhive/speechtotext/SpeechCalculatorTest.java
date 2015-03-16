@@ -2,6 +2,8 @@ package info.androidhive.speechtotext;
 
 import junit.framework.TestCase;
 
+import info.androidhive.speechtotext.speech_calculator.SpeechCalculator;
+
 public class SpeechCalculatorTest extends TestCase {
 
     public void testCountNumbersAndArithmeticOperations() throws Exception {
