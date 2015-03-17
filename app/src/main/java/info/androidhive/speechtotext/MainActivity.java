@@ -28,7 +28,7 @@ public class MainActivity extends Activity {
 	private ImageButton btnSpeak;
 	private final int REQ_CODE_SPEECH_INPUT = 100;
     private TextToSpeech ttobj;
-    private String language = "en_US";
+    public static String language = "en_US";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

@@ -9,18 +9,35 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import info.androidhive.speechtotext.MainActivity;
 
 public class RecognitionGuess {
 
     private static Map<String, String> UNARY_OPERATIONS = new HashMap<String, String>() {{
         put("root", "sqrt");
+        put("корень", "sqrt");
         put("logarithm", "log");
+        put("логарифм", "log");
         put("sign", "sin");
         put("sine", "sin");
+        put("синус", "sin");
         put("cosine", "cos");
+        put("косинус", "cos");
         put("tangent", "tan");
+        put("тангенс", "tan");
+    }};
+
+    private static Map<String, String> BINARY_OPERATIONS = new HashMap<String, String>() {{
+        put("add", "+");
+        put("сложить", "+");
+        put("прибавить", "+");
+        put("multiply", "*");
+        put("subtract", "-");
+        put("вычесть", "-");
     }};
 
     private static Evaluator mEvaluator = new Evaluator();
@@ -38,7 +55,7 @@ public class RecognitionGuess {
 
     private static String normalizeSingleToken(String token) {
         token = token.toLowerCase();
-        if (token.matches("[-+]?[0-9]*\\.?[0-9]*") ) {
+        if (token.matches("[-+]?[0-9]*\\.?[0-9]*") || UNARY_OPERATIONS.containsKey(token) || BINARY_OPERATIONS.containsKey(token)) {
             return token;
         } else if (token.equals("times") || token.contains("множ")) {
             return "*";
@@ -48,6 +65,8 @@ public class RecognitionGuess {
             return "+";
         } else if (token.startsWith("minus") || token.contains("минус")) {
             return "-";
+        } else if (token.equals("at")) {
+            return "add";
         } else {
             return "";
         }
@@ -70,10 +89,11 @@ public class RecognitionGuess {
         for (int i = 0; i < tokens.size(); ++i) {
             String token = tokens.get(i);
             if (UNARY_OPERATIONS.containsKey(token)) {
-                result.add(UNARY_OPERATIONS.get(token));
-                result.add("(");
-                result.add(tokens.get(++i));
-                result.add(")");
+                try {
+                    result.add(UNARY_OPERATIONS.get(token) + "(" + tokens.get(++i) + ")");
+                } catch (IndexOutOfBoundsException ignored) {
+
+                }
             } else {
                 result.add(token);
             }
@@ -83,7 +103,23 @@ public class RecognitionGuess {
 
     private static List<String> applyBinaryOperations(List<String> tokens) {
         List<String> result = new ArrayList<String>();
-        return tokens;
+        for (int i = 0; i < tokens.size(); ++i) {
+            String token = tokens.get(i);
+            if (BINARY_OPERATIONS.containsKey(token)) {
+                try {
+                    String firstOperand = tokens.get(++i);
+                    String secondOperand = tokens.get(++i);
+                    result.add(secondOperand);
+                    result.add(BINARY_OPERATIONS.get(token));
+                    result.add(firstOperand);
+                } catch (IndexOutOfBoundsException ignored) {
+
+                }
+            } else {
+                result.add(token);
+            }
+        }
+        return result;
     }
 
     private static String joinTokens(List<String> tokens) {
@@ -99,9 +135,13 @@ public class RecognitionGuess {
     private void evaluate(String mathExpression) {
         try {
             this.evaluatedValue = String.format(
+                    Locale.US,
                     "%.2f",
                     Double.parseDouble(mEvaluator.evaluate(mathExpression))
             );
+            if (this.evaluatedValue.endsWith("00")) {
+                this.evaluatedValue = this.evaluatedValue.substring(0, this.evaluatedValue.length() - 3);
+            }
             this.isEvaluated = true;
         } catch (EvaluationException exception) {
             this.evaluatedValue = "undefined";
@@ -132,6 +172,7 @@ public class RecognitionGuess {
     }
 
     public String toTTSForm() {
-        return this.getRecognitionOutput() + " is " + this.getEvaluatedValue();
+        return this.getRecognitionOutput() + (MainActivity.language.equals("en_US") ? " is " : " будет ")
+                + this.getEvaluatedValue();
     }
 }
