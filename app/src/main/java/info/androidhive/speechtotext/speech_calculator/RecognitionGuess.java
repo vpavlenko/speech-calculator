@@ -6,8 +6,10 @@ import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class RecognitionGuess {
@@ -17,26 +19,40 @@ public class RecognitionGuess {
         add("is");
         add("you");
         add("by");
+        add("of");
+        add("square");
+    }};
+
+    private static Map<String, String> UNARY_OPERATIONS = new HashMap<String, String>() {{
+        put("root", "sqrt");
+        put("logarithm", "log");
+        put("sign", "sin");
+        put("sine", "sin");
+        put("cosine", "cos");
+        put("tangent", "tan");
     }};
 
     private static Evaluator mEvaluator = new Evaluator();
 
     private String recognitionOutput;
-    private String normalizedGuess;
+    private String mathExpression;
     private String evaluatedValue;
     private boolean isEvaluated;
 
     RecognitionGuess(String recognitionOutput) {
         this.recognitionOutput = recognitionOutput;
-        normalizeGuess();
-        evaluate();
+        this.mathExpression = convertToMathExpression(this.recognitionOutput);
+        evaluate(this.mathExpression);
     }
 
     private static String normalizeSingleToken(String token) {
+        token = token.toLowerCase();
         if (token.equals("times")) {
             return "*";
-        } else if (token.startsWith("divi")) {
+        } else if (token.startsWith("divi") || token.startsWith("over")) {
             return "/";
+        } else if (token.startsWith("plus")) {
+            return "+";
         } else if (token.startsWith("free")) {
             return "3";
         } else if (IGNORED_WORDS.contains(token)) {
@@ -45,24 +61,54 @@ public class RecognitionGuess {
         return token;
     }
 
-    private static String normalizeTokens(String recognitionResult) {
+    private static List<String> normalizeTokens(String recognitionResult) {
         String[] tokens = recognitionResult.split("\\s+");
         List<String> normalizedTokens = new ArrayList<String>();
         for (String token: tokens) {
-            normalizedTokens.add(normalizeSingleToken(token));
+            String normalizedToken = normalizeSingleToken(token);
+            if (normalizedToken.length() > 0) {
+                normalizedTokens.add(normalizedToken);
+            }
         }
-        return Joiner.on(" ").join(normalizedTokens);
+        return normalizedTokens;
     }
 
-    private void normalizeGuess() {
-        this.normalizedGuess = normalizeTokens(this.recognitionOutput);
+    private static List<String> applyUnaryOperations(List<String> tokens) {
+        List<String> result = new ArrayList<String>();
+        for (int i = 0; i < tokens.size(); ++i) {
+            String token = tokens.get(i);
+            if (UNARY_OPERATIONS.containsKey(token)) {
+                result.add(UNARY_OPERATIONS.get(token));
+                result.add("(");
+                result.add(tokens.get(++i));
+                result.add(")");
+            } else {
+                result.add(token);
+            }
+        }
+        return result;
     }
 
-    private void evaluate() {
+    private static List<String> applyBinaryOperations(List<String> tokens) {
+        List<String> result = new ArrayList<String>();
+        return tokens;
+    }
+
+    private static String joinTokens(List<String> tokens) {
+        return Joiner.on(" ").join(tokens);
+    }
+
+    private String convertToMathExpression(String recognitionOutput) {
+        return joinTokens(
+                applyBinaryOperations(applyUnaryOperations(normalizeTokens(recognitionOutput)))
+        );
+    }
+
+    private void evaluate(String mathExpression) {
         try {
             this.evaluatedValue = String.format(
                     "%.2f",
-                    Double.parseDouble(mEvaluator.evaluate(this.getNormalizedGuess()))
+                    Double.parseDouble(mEvaluator.evaluate(mathExpression))
             );
             this.isEvaluated = true;
         } catch (EvaluationException exception) {
@@ -76,7 +122,7 @@ public class RecognitionGuess {
     }
 
     public String getNormalizedGuess() {
-        return normalizedGuess;
+        return mathExpression;
     }
 
     public String getEvaluatedValue() {
@@ -94,6 +140,6 @@ public class RecognitionGuess {
     }
 
     public String toTTSForm() {
-        return this.getNormalizedGuess() + " is " + this.getEvaluatedValue();
+        return this.getRecognitionOutput() + " is " + this.getEvaluatedValue();
     }
 }

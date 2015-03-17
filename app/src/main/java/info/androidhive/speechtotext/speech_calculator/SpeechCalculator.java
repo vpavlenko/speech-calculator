@@ -35,13 +35,13 @@ public class SpeechCalculator {
             normalizedResults.add(new RecognitionGuess(result));
         }
 
-        Collections.sort(normalizedResults, new Comparator<RecognitionGuess>() {
-            @Override
-            public int compare(RecognitionGuess g, RecognitionGuess g2) {
-                return countNumbersAndArithmeticOperations(g2.getNormalizedGuess())
-                       - countNumbersAndArithmeticOperations(g.getNormalizedGuess());
-            }
-        });
+//        Collections.sort(normalizedResults, new Comparator<RecognitionGuess>() {
+//            @Override
+//            public int compare(RecognitionGuess g, RecognitionGuess g2) {
+//                return countNumbersAndArithmeticOperations(g2.getNormalizedGuess())
+//                       - countNumbersAndArithmeticOperations(g.getNormalizedGuess());
+//            }
+//        });
 
         Collections.sort(normalizedResults, new Comparator<RecognitionGuess>() {
             @Override
