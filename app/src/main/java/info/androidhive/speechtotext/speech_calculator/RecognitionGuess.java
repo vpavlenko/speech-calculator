@@ -13,15 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class RecognitionGuess {
-    private static Set<String> IGNORED_WORDS = new HashSet<String>() {{
-        add("how");
-        add("much");
-        add("is");
-        add("you");
-        add("by");
-        add("of");
-        add("square");
-    }};
 
     private static Map<String, String> UNARY_OPERATIONS = new HashMap<String, String>() {{
         put("root", "sqrt");
@@ -47,18 +38,19 @@ public class RecognitionGuess {
 
     private static String normalizeSingleToken(String token) {
         token = token.toLowerCase();
-        if (token.equals("times")) {
+        if (token.matches("[-+]?[0-9]*\\.?[0-9]*") ) {
+            return token;
+        } else if (token.equals("times") || token.contains("множ")) {
             return "*";
-        } else if (token.startsWith("divi") || token.startsWith("over")) {
+        } else if (token.startsWith("divi") || token.startsWith("over") || token.contains("дел")) {
             return "/";
-        } else if (token.startsWith("plus")) {
+        } else if (token.startsWith("plus") || token.contains("плюс")) {
             return "+";
-        } else if (token.startsWith("free")) {
-            return "3";
-        } else if (IGNORED_WORDS.contains(token)) {
+        } else if (token.startsWith("minus") || token.contains("минус")) {
+            return "-";
+        } else {
             return "";
         }
-        return token;
     }
 
     private static List<String> normalizeTokens(String recognitionResult) {

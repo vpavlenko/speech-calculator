@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.common.base.Joiner;
 
@@ -27,6 +28,7 @@ public class MainActivity extends Activity {
 	private ImageButton btnSpeak;
 	private final int REQ_CODE_SPEECH_INPUT = 100;
     private TextToSpeech ttobj;
+    private String language = "en_US";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +39,12 @@ public class MainActivity extends Activity {
             @Override
             public void onInit(int status) {
                 if(status != TextToSpeech.ERROR){
-                    ttobj.setLanguage(Locale.US);
+                    if (language == "en_US")
+                        ttobj.setLanguage(Locale.US);
+                    else {
+                        Locale locale = new Locale("ru");
+                        ttobj.setLanguage(locale);
+                    }
                 }
             }
         });
@@ -65,7 +72,7 @@ public class MainActivity extends Activity {
 		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
 				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
 		intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
 				getString(R.string.speech_prompt));
 		try {
@@ -107,5 +114,17 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
+
+    public void onToggleClicked(View view) {
+        boolean on = ((ToggleButton) view).isChecked();
+        if (on) {
+            language = "ru_RU";
+            Locale locale = new Locale("ru");
+            ttobj.setLanguage(locale);
+        }else {
+            language = "en_US";
+            ttobj.setLanguage(Locale.US);
+        }
+    }
 
 }
