@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +22,10 @@ public class RecognitionGuess {
         add("by");
         add("of");
         add("square");
+        add("&");
+        add("from");
+        add("to");
+        add("and");
     }};
 
     private static Map<String, String> UNARY_OPERATIONS = new HashMap<String, String>() {{
@@ -30,6 +35,12 @@ public class RecognitionGuess {
         put("sine", "sin");
         put("cosine", "cos");
         put("tangent", "tan");
+    }};
+
+    private static Map<String, String> BINARY_OPERATIONS = new HashMap<String, String>() {{
+        put("add", "+");
+        put("multiply", "*");
+        put("subtract", "-");
     }};
 
     private static Evaluator mEvaluator = new Evaluator();
@@ -55,6 +66,8 @@ public class RecognitionGuess {
             return "+";
         } else if (token.startsWith("free")) {
             return "3";
+        } else if (token.equals("at")) {
+            return "add";
         } else if (IGNORED_WORDS.contains(token)) {
             return "";
         }
@@ -78,10 +91,11 @@ public class RecognitionGuess {
         for (int i = 0; i < tokens.size(); ++i) {
             String token = tokens.get(i);
             if (UNARY_OPERATIONS.containsKey(token)) {
-                result.add(UNARY_OPERATIONS.get(token));
-                result.add("(");
-                result.add(tokens.get(++i));
-                result.add(")");
+                try {
+                    result.add(UNARY_OPERATIONS.get(token) + "(" + tokens.get(++i) + ")");
+                } catch (IndexOutOfBoundsException ignored) {
+
+                }
             } else {
                 result.add(token);
             }
@@ -91,7 +105,23 @@ public class RecognitionGuess {
 
     private static List<String> applyBinaryOperations(List<String> tokens) {
         List<String> result = new ArrayList<String>();
-        return tokens;
+        for (int i = 0; i < tokens.size(); ++i) {
+            String token = tokens.get(i);
+            if (BINARY_OPERATIONS.containsKey(token)) {
+                try {
+                    String firstOperand = tokens.get(++i);
+                    String secondOperand = tokens.get(++i);
+                    result.add(secondOperand);
+                    result.add(BINARY_OPERATIONS.get(token));
+                    result.add(firstOperand);
+                } catch (IndexOutOfBoundsException ignored) {
+
+                }
+            } else {
+                result.add(token);
+            }
+        }
+        return result;
     }
 
     private static String joinTokens(List<String> tokens) {
@@ -107,9 +137,13 @@ public class RecognitionGuess {
     private void evaluate(String mathExpression) {
         try {
             this.evaluatedValue = String.format(
+                    Locale.US,
                     "%.2f",
                     Double.parseDouble(mEvaluator.evaluate(mathExpression))
             );
+            if (this.evaluatedValue.endsWith("00")) {
+                this.evaluatedValue = this.evaluatedValue.substring(0, this.evaluatedValue.length() - 3);
+            }
             this.isEvaluated = true;
         } catch (EvaluationException exception) {
             this.evaluatedValue = "undefined";
