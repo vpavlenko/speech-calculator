@@ -1,16 +1,9 @@
-package info.androidhive.speechtotext.speech_calculator;
-
-import com.google.common.base.Joiner;
-
-import net.sourceforge.jeval.EvaluationException;
-import net.sourceforge.jeval.Evaluator;
+package ru.skoltech.language.speech_calculator;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

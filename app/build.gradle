@@ -4,8 +4,8 @@ android {
     compileSdkVersion 19
     buildToolsVersion "21.1.2"
     defaultConfig {
-        applicationId "info.androidhive.speechtotext"
-        minSdkVersion 19
+        applicationId "ru.skoltech.language"
+        minSdkVersion 11
         targetSdkVersion 19
     }
     buildTypes {

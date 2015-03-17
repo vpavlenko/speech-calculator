@@ -1,4 +1,4 @@
-package info.androidhive.speechtotext.speech_calculator;
+package ru.skoltech.language.speech_calculator;
 
 import com.google.common.base.Joiner;
 
@@ -7,13 +7,11 @@ import net.sourceforge.jeval.Evaluator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
-import info.androidhive.speechtotext.MainActivity;
+import ru.skoltech.language.MainActivity;
 
 public class RecognitionGuess {
 

@@ -1,8 +1,8 @@
-package info.androidhive.speechtotext;
+package ru.skoltech.language;
 
 import junit.framework.TestCase;
 
-import info.androidhive.speechtotext.speech_calculator.SpeechCalculator;
+import ru.skoltech.language.speech_calculator.SpeechCalculator;
 
 public class SpeechCalculatorTest extends TestCase {
 
