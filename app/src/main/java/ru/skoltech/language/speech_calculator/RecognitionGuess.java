@@ -1,5 +1,7 @@
 package ru.skoltech.language.speech_calculator;
 
+import android.util.Log;
+
 import com.google.common.base.Joiner;
 
 import net.sourceforge.jeval.EvaluationException;
@@ -55,7 +57,7 @@ public class RecognitionGuess {
         token = token.toLowerCase();
         if (token.matches("[-+]?[0-9]*\\.?[0-9]*") || UNARY_OPERATIONS.containsKey(token) || BINARY_OPERATIONS.containsKey(token)) {
             return token;
-        } else if (token.equals("times") || token.contains("множ")) {
+        } else if (token.equals("times") || token.equals("multiplied") || token.contains("множ")) {
             return "*";
         } else if (token.startsWith("divi") || token.startsWith("over") || token.contains("дел")) {
             return "/";
@@ -142,7 +144,9 @@ public class RecognitionGuess {
             }
             this.isEvaluated = true;
         } catch (EvaluationException exception) {
-            this.evaluatedValue = "undefined";
+            this.evaluatedValue = MainActivity.language.equals("en_US") ? "say it again"
+                    : "не понимаю";
+            Log.d("LANGUAGE", MainActivity.language);
             this.isEvaluated = false;
         }
     }
@@ -170,7 +174,6 @@ public class RecognitionGuess {
     }
 
     public String toTTSForm() {
-        return this.getRecognitionOutput() + (MainActivity.language.equals("en_US") ? " is " : " будет ")
-                + this.getEvaluatedValue();
+        return this.getEvaluatedValue();
     }
 }

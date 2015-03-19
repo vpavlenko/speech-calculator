@@ -1,9 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <ToggleButton
         android:id="@+id/languageButton"
@@ -15,16 +14,31 @@
         android:textOn="@string/lang_ru"
         android:onClick="onToggleClicked"/>
 
-    <TextView
-        android:id="@+id/txtSpeechInput"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        android:textColor="@color/white"
-        android:textSize="12dp"
-        android:textStyle="normal" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:layout_below="@+id/languageButton"
+        android:layout_above="@+id/linearLayout">
+
+        <TextView
+            android:id="@+id/txtQuery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="36sp"
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/txtEvaluatedResult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            android:textColor="@color/white"
+            android:textSize="60sp"
+            android:textStyle="normal" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -33,14 +47,16 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="60dp"
         android:gravity="center"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:id="@+id/linearLayout">
 
         <ImageButton
             android:id="@+id/btnSpeak"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"
-            android:src="@drawable/ico_mic" />
+            android:src="@drawable/ico_mic"
+            android:contentDescription="@string/microphone_icon_description" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -48,7 +64,7 @@
             android:layout_marginTop="10dp"
             android:text="@string/tap_on_mic"
             android:textColor="@color/white"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:textStyle="normal" />
     </LinearLayout>
 

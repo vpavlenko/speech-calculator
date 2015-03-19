@@ -1,15 +1,12 @@
 package ru.skoltech.language;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ImageButton;
@@ -17,14 +14,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.google.common.base.Joiner;
+import java.util.ArrayList;
+import java.util.Locale;
 
 import ru.skoltech.language.speech_calculator.RecognitionGuess;
 import ru.skoltech.language.speech_calculator.SpeechCalculator;
 
 public class MainActivity extends Activity {
 
-	private TextView txtSpeechInput;
+	private TextView txtQuery, txtEvaluatedResult;
 	private ImageButton btnSpeak;
 	private final int REQ_CODE_SPEECH_INPUT = 100;
     private TextToSpeech ttobj;
@@ -39,7 +37,7 @@ public class MainActivity extends Activity {
             @Override
             public void onInit(int status) {
                 if(status != TextToSpeech.ERROR){
-                    if (language == "en_US")
+                    if (language.equals("en_US"))
                         ttobj.setLanguage(Locale.US);
                     else {
                         Locale locale = new Locale("ru");
@@ -49,11 +47,9 @@ public class MainActivity extends Activity {
             }
         });
 
-		txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
+        txtQuery = (TextView) findViewById(R.id.txtQuery);
+        txtEvaluatedResult = (TextView) findViewById(R.id.txtEvaluatedResult);
 		btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
-
-		// hide the action bar
-		getActionBar().hide();
 
 		btnSpeak.setOnClickListener(new View.OnClickListener() {
 
@@ -94,13 +90,17 @@ public class MainActivity extends Activity {
 		switch (requestCode) {
 		case REQ_CODE_SPEECH_INPUT: {
 			if (resultCode == RESULT_OK && null != data) {
-				ArrayList<String> result = data
+				ArrayList<String> recognitionResults = data
 						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 
-                List<RecognitionGuess> results = SpeechCalculator.processRecognitionResult(result);
+                RecognitionGuess bestResult =
+                        SpeechCalculator.processRecognitionResult(recognitionResults).get(0);
 
-				txtSpeechInput.setText(Joiner.on("\n").join(results));
-                ttobj.speak(results.get(0).toTTSForm(), TextToSpeech.QUEUE_FLUSH, null);
+                Log.d("BEST_RESULT", bestResult.toString());
+
+                txtQuery.setText(bestResult.getNormalizedGuess());
+                txtEvaluatedResult.setText(bestResult.getEvaluatedValue());
+                ttobj.speak(bestResult.toTTSForm(), TextToSpeech.QUEUE_FLUSH, null);
             }
 			break;
 		}
@@ -119,9 +119,8 @@ public class MainActivity extends Activity {
         boolean on = ((ToggleButton) view).isChecked();
         if (on) {
             language = "ru_RU";
-            Locale locale = new Locale("ru");
-            ttobj.setLanguage(locale);
-        }else {
+            ttobj.setLanguage(new Locale("ru"));
+        } else {
             language = "en_US";
             ttobj.setLanguage(Locale.US);
         }
