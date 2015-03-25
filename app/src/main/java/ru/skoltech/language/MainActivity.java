@@ -19,6 +19,9 @@ import android.widget.Toast;
 
 import com.github.kevinsawicki.http.HttpRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -51,7 +54,19 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				byte[] PCMSound = writeSpeechChunkToPCM();
                 String text = recognizePCMFile(PCMSound);
-                Log.i("RECOGNIZED TEXT", text);
+                Log.i("JSON RESPONSE", text);
+                //{"result":[{"alternative":[{"transcript":"друг","confide
+                //{"result":[{"alternative":[{"transcript":"мой дядя","confidence":0.93204647}],"final":true}],"result_index":0}
+                String transcript;
+                try {
+                    transcript = new JSONObject(text.split("\\r?\\n")[1]).getJSONArray("result")
+                            .getJSONObject(0).getJSONArray("alternative").getJSONObject(0)
+                            .getString("transcript");
+                    Log.i("TRANSCRIPT", transcript);
+                    txtQuery.setText(txtQuery.getText() + "\n" + transcript);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 			}
 		});
 
@@ -139,14 +154,14 @@ public class MainActivity extends Activity {
 
             if( (temp >=0 && temp <= 350) && recording == false )
             {
-                Log.i("TAG", "1");
+//                Log.i("TAG", "1");
                 tempIndex++;
                 continue;
             }
 
             if( temp > 350 && recording == false )
             {
-                Log.i("TAG", "2");
+//                Log.i("TAG", "2");
                 recording = true;
             }
 
@@ -168,6 +183,7 @@ public class MainActivity extends Activity {
                     realSize--;
                 }
 
+                audioRecorder.stop();
                 return Arrays.copyOfRange(totalByteBuffer, 0, realSize);
             }
 
