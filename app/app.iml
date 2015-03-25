@@ -89,6 +89,7 @@
     <orderEntry type="library" exported="" name="jsr305-1.3.9" level="project" />
     <orderEntry type="library" exported="" name="jeval-0.9.4" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.1.0" level="project" />
+    <orderEntry type="library" exported="" name="http-request-5.3" level="project" />
     <orderEntry type="library" exported="" name="hamcrest-core-1.3" level="project" />
     <orderEntry type="library" exported="" name="junit-4.11" level="project" />
   </component>

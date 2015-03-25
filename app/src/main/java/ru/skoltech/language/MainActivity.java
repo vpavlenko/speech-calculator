@@ -8,6 +8,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.Menu;
@@ -16,10 +17,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.kevinsawicki.http.HttpRequest;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class MainActivity extends Activity {
@@ -31,7 +35,12 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+
+        // http://stackoverflow.com/questions/22395417/error-strictmodeandroidblockguardpolicy-onnetwork
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        setContentView(R.layout.activity_main);
 
         txtQuery = (TextView) findViewById(R.id.txtQuery);
 		btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
@@ -40,11 +49,24 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				promptSpeechInputContinuous();
+				byte[] PCMSound = writeSpeechChunkToPCM();
+                String text = recognizePCMFile(PCMSound);
+                Log.i("RECOGNIZED TEXT", text);
 			}
 		});
 
 	}
+
+    private String recognizePCMFile(byte[] PCMSound) {
+        HttpRequest request = HttpRequest.post("https://www.google.com/speech-api/v2/recognize",
+                true, "output", "json", "lang", "ru-ru", "key", "AIzaSyDbzyMzbi_vNpEvjhO_ob8mEVMxi70FUuI")
+                .header("Content-Type", "audio/l16; rate=16000;")
+                .trustAllCerts()
+                .trustAllHosts()
+                .send(PCMSound);
+
+        return request.body();
+    }
 
 	/**
 	 * Showing google speech input dialog
@@ -65,7 +87,7 @@ public class MainActivity extends Activity {
 		}
 	}
 
-    private void promptSpeechInputContinuous() {
+    private byte[] writeSpeechChunkToPCM() {
         int RECORDER_SAMPLERATE = 16000;
         int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
         int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
@@ -138,25 +160,15 @@ public class MainActivity extends Activity {
                 if( !file.exists() )
                     file.mkdirs();
 
-                String fn = file.getAbsolutePath() + "/" + System.currentTimeMillis() + ".pcm";
-                Log.i("FILENAME", fn);
+                String fileName = file.getAbsolutePath() + "/" + System.currentTimeMillis() + ".pcm";
+                Log.i("FILENAME", fileName);
 
                 int realSize = totalByteBuffer.length;
                 while (totalByteBuffer[realSize - 1] == 0) {
                     realSize--;
                 }
 
-                FileOutputStream out;
-                try {
-                    out = new FileOutputStream(fn);
-                    out.write(totalByteBuffer, 0, realSize);
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                tempIndex++;
-                break;
+                return Arrays.copyOfRange(totalByteBuffer, 0, realSize);
             }
 
             // -> Recording sound here.
